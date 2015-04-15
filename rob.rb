@@ -1,5 +1,6 @@
 require 'rack'
 require 'pry'
+require 'erubis'
 
 # Ruby on Bros
 module ROB
@@ -78,19 +79,18 @@ module ROB
       text = self.send(act)
       [200, {'Content-Type' => 'text/html'}, [text]]
     end
+
+    def erb(view, locals = {})
+      filename = File.join("app", "views", controller_name, "#{view}.html.erb")
+      template = File.read filename
+      eruby = Erubis::Eruby.new(template)
+      eruby.result(locals.merge(env: env))
+    end
+
+    def controller_name
+      klass = self.class
+      "#{klass.to_s.gsub(/Controller$/, '').downcase}s"
+    end
   end
 end
 
-class ExampleController < ROB::Controller
-  def index
-    'index text'
-  end
-
-  def example_two
-    'this is example two text'
-  end
-
-  def home_page
-    'this is the text for the home page!'
-  end
-end
