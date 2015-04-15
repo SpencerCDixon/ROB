@@ -1,12 +1,7 @@
-require_relative 'rod'
-
-app = ROB::Application.new
-
-app.routes do
-  get '/', to: 'example#index'
-  get '/example', to: 'example#example_two'
+Dir['config/*.rb'].each do |path|
+  require File.join(File.dirname(__FILE__), path)
 end
 
-run app, port: 6969
+run BroApp
 
 

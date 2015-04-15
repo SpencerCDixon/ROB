@@ -51,6 +51,12 @@ module ROB
       @rules << { path: path, controller: cont, action: act }
     end
 
+    def root(options)
+      cont, act = parse_options(options[:to])
+      cont = Object.const_get("#{cont.capitalize}Controller")
+      @rules << { path: '/', controller: cont, action: act }
+    end
+
     def parse_options(options)
       controller, action = options.split("#")
       [controller, action]
@@ -82,5 +88,9 @@ class ExampleController < ROB::Controller
 
   def example_two
     'this is example two text'
+  end
+
+  def home_page
+    'this is the text for the home page!'
   end
 end
