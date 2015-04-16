@@ -7,6 +7,6 @@ class ExampleController < ApplicationController
   end
 
   def home_page
-    erb :home_page, locals: { name: 'spencer' }
+    render_with_layout :layout_page, :sample_layout
   end
 end

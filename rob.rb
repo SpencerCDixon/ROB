@@ -73,13 +73,13 @@ module ROB
 
     # needs to be class method since we're calling on the class object
     def self.action(act)
+      # returns proc that responds to #call
       proc { |e| self.new(e).dispatch(act) }
     end
 
     def dispatch(act)
       text = self.send(act)
       Rack::Response.new([text], 200, {'Content-Type' => 'text/html'})
-      # [200, {'Content-Type' => 'text/html'}, [text]]
     end
 
     def erb(view, locals = {})
@@ -95,16 +95,28 @@ module ROB
       Haml::Engine.new(template).render(self, locals)
     end
 
-    def default_layout(&block)
-      filename = File.join("app", "views", "layouts", "application.html.erb")
-      template = File.read filename
-      eruby = Erubis::Eruby.new(template)
-      eruby.result
+    def render_with_layout(view, layout = :application, context = self)
+      filename = File.join("app", "views", controller_name, "#{view}.html.erb")
+      template = File.read(filename)
+      render_layout(layout) do
+        Erubis::Eruby.new(template).result(context.get_binding)
+      end
     end
 
+    def render_layout(layout)
+      template = File.read("app/views/layouts/#{layout}.html.erb")
+      Erubis::Eruby.new(template).result(binding)
+    end
+
+    # used for finding views in proper directory
     def controller_name
       klass = self.class
       "#{klass.to_s.gsub(/Controller$/, '').downcase}s"
+    end
+
+    # used to yield templates inside each other
+    def get_binding
+      return binding
     end
   end
 end
