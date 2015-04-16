@@ -1,6 +1,7 @@
 require 'rack'
 require 'pry'
 require 'erubis'
+require 'haml'
 
 # Ruby on Bros
 module ROB
@@ -13,7 +14,7 @@ module ROB
       if app = get_rack_app(env)
         app.call(env)
       else
-        [404, { 'Content-Type' => 'text/html' }, ['Error occured sorry broseph']]
+        Rack::Response.new(['Error occured. No route'], 404, {})
       end
     end
 
@@ -77,7 +78,8 @@ module ROB
 
     def dispatch(act)
       text = self.send(act)
-      [200, {'Content-Type' => 'text/html'}, [text]]
+      Rack::Response.new([text], 200, {'Content-Type' => 'text/html'})
+      # [200, {'Content-Type' => 'text/html'}, [text]]
     end
 
     def erb(view, locals = {})
@@ -85,6 +87,19 @@ module ROB
       template = File.read filename
       eruby = Erubis::Eruby.new(template)
       eruby.result(locals.merge(env: env))
+    end
+
+    def haml(view, locals = {})
+      filename = File.join("app", "views", controller_name, "#{view}.html.haml")
+      template = File.read filename
+      Haml::Engine.new(template).render(self, locals)
+    end
+
+    def default_layout(&block)
+      filename = File.join("app", "views", "layouts", "application.html.erb")
+      template = File.read filename
+      eruby = Erubis::Eruby.new(template)
+      eruby.result
     end
 
     def controller_name

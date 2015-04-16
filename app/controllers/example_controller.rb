@@ -1,10 +1,9 @@
 class ExampleController < ApplicationController
   def index
-    'index text'
   end
 
   def example_two
-    'this is example two text'
+    haml :example_two, locals: { test: 'test' }
   end
 
   def home_page
